@@ -8,10 +8,14 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <string.h>
+#include <avr/interrupt.h>
 
-#define F_CPU 8000000UL
+#define F_CPU 1000000UL
 #define BAUD 4800UL
 #define MYUBRR ((unsigned long)((F_CPU/(16*BAUD))-1))
+
+#define toogleBit(valor,bit) (valor ^= (1<<bit))
+#define setBit(valor,bit) (valor |= (1<<bit))
 
 /* -------------------------------------------- SERIAL ----------------------------------------- */
 
@@ -82,6 +86,11 @@ void lcd_clear(){
 	_delay_ms(2);		
 	lcd_comando(0x80);	
 }
+/* ------------------------------------------- INTERRUPT ---------------------------------------- */
+
+ISR(PCINT2_vect){
+	toogleBit(PORTD,2);
+}
 
 /* --------------------------------------------------------------------------------------------- */
 
@@ -103,12 +112,15 @@ char vmax;
 int main(void)
 {
 	DDRB = 0xff;
-	DDRC = 0x07;
+	DDRC = 0xff;
 	
 	lcd_init();
 	USART_Init(MYUBRR);
 	
 	welcome();
+	
+	setBit(PORTC,3);
+	sei();
 	
 	while (1) 
     {		
