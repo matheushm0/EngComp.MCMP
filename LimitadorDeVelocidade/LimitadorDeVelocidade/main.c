@@ -86,10 +86,27 @@ void lcd_clear(){
 	_delay_ms(2);		
 	lcd_comando(0x80);	
 }
-/* ------------------------------------------- INTERRUPT ---------------------------------------- */
+/* ------------------------------------------ INTERRUPT ---------------------------------------- */
 
 ISR(PCINT2_vect){
-	toogleBit(PORTD,2);
+	if((PIND&(1 << 2))){
+		toogleBit(PORTC,3);
+	}
+}
+
+void interrupt_init(){
+	
+	PCICR = 0x04;
+	PCMSK2 = 0x0c;
+	sei();
+	
+}
+
+/* --------------------------------------------- SPEED ------------------------------------------ */
+
+void speed(){
+	
+	
 }
 
 /* --------------------------------------------------------------------------------------------- */
@@ -114,13 +131,11 @@ int main(void)
 	DDRB = 0xff;
 	DDRC = 0xff;
 	
+	interrupt_init();
 	lcd_init();
 	USART_Init(MYUBRR);
 	
 	welcome();
-	
-	setBit(PORTC,3);
-	sei();
 	
 	while (1) 
     {		
