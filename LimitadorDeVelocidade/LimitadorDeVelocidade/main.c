@@ -5,6 +5,7 @@
  * Author : Matheus
  */ 
 
+#include <stdlib.h>
 #include <math.h>
 #include <avr/io.h>
 #include <util/delay.h>
@@ -17,6 +18,7 @@
 
 #define toogleBit(valor,bit) (valor ^= (1<<bit))
 #define setBit(valor,bit) (valor |= (1<<bit))
+#define clearBit(valor,bit) (valor &= ~(1<<bit))
 
 /* -------------------------------------------- SERIAL ----------------------------------------- */
 
@@ -90,6 +92,7 @@ void lcd_clear(){
 /* ------------------------------------------ INTERRUPT ---------------------------------------- */
 
 float count;
+float tempo; 
 
 ISR(PCINT2_vect){
 
@@ -97,6 +100,7 @@ ISR(PCINT2_vect){
 		toogleBit(PORTC,3);
 		count++;
 	}
+	tempo = count / 60;
 }
 
 void interrupt_init(){
@@ -170,22 +174,28 @@ void ftoa(float n, char *res, int afterpoint)
     } 
 } 
 
-char vmax;
 char x[5];
+float vmax;
 
 void speed(float tempo, float vmax){
 	
 	float distancia = 0.06;
-	float velocidade = 0.0;
-	float vatual = 0.0;
+	float velocidade = 0;
+	float vatual = 0;
 	
 	velocidade = (tempo/distancia) * 3.6;
 	
 	vatual += velocidade; 
 	
-	ftoa(vatual, x, 5);
-	for(int i = 0; i < 5; i++){
+	ftoa(vatual, x, 3);
+
+	for(int i = 0; i < 3; i++){
 		lcd_dado(x[i]);
+	}
+	
+	while(vatual > vmax){
+		USART_putstring("teste");
+		clearBit(PORTC,4);
 	}
 	
 }
@@ -204,7 +214,7 @@ void welcome(){
 	
 }
 
-char tx;
+char tx[4];
 
 int main(void)
 {
@@ -219,16 +229,25 @@ int main(void)
 	
 	while (1) 
     {		
+		for(int i = 0; i < 4; i++){
+			tx[i] = USART_Receive();
+			USART_Transmit(tx[i]);
+			lcd_dado(tx[i]);
 		
-		tx = USART_Receive();
-		USART_Transmit(tx);
-		lcd_dado(tx);
-		vmax = tx;
-		
-		if(tx == 0x0D){		
-			lcd_clear();
-			lcd_print("V Atual:");
-			lcd_print(" 0 Km/h");
+			if(tx[i] == 0x0D){
+				lcd_clear();
+				lcd_print("VAtual:");
+				lcd_comando(0x8C);
+				lcd_print("Km/h");
+				vmax = atof(tx);
+				
+				atualiza:
+				
+				lcd_comando(0x88);
+				speed(tempo, vmax);
+				_delay_ms(100);
+				goto atualiza;
+			}
 		}
     }
 }
