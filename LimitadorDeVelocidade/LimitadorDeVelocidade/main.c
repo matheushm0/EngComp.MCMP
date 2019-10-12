@@ -193,9 +193,8 @@ void speed(float tempo, float vmax){
 		lcd_dado(x[i]);
 	}
 	
-	while(vatual > vmax){
-		USART_putstring("teste");
-		clearBit(PORTC,4);
+	if(vatual > vmax){
+		setBit(PORTC,4);
 	}
 	
 }
