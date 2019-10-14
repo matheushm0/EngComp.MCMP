@@ -10,17 +10,20 @@
 #include <string.h>
 #include <avr/interrupt.h>
 
-#define BAUD 4800UL
-#define MYUBRR ((unsigned long)((F_CPU/(16*BAUD))-1))
+#define BAUD 28800
+#define MYUBRR FOSC/16/BAUD-1
 #define F_CPU 1000000UL
+#define FOSC 16000000
 /* -------------------------------------------- SERIAL ----------------------------------------- */
 
 void USART_Init(unsigned int ubrr){
 	
 	UBRR0H = (unsigned char)(ubrr>>8);
 	UBRR0L = (unsigned char)ubrr;
-	UCSR0B = (1<<RXEN0)|(1<<TXEN0);
-	UCSR0C = (1<<USBS0)|(3<<UCSZ00);
+	UCSR0A |= (1 << U2X0);
+	UCSR0B |= (1 << RXEN0)|(1 << TXEN0);
+	UCSR0B |= (1 << RXCIE0);
+	UCSR0C = 0x2C; 
 }
 
 void USART_Transmit(unsigned char data){
@@ -79,52 +82,45 @@ void lcd_print (char *c){
 
 /* --------------------------------------------------------------------------------------------- */
 
-char tx;
+volatile char tx;
+
+ISR(USART_RX_vect)
+{
+	tx = UDR0;
+	lcd_dado(tx);
+}
 
 ISR(PCINT2_vect){
 	if(!(PIND&(1<< 2))){
-		tx = 'A';
-		lcd_dado(tx);
-		USART_Transmit(0x0d);
-		USART_Transmit(tx);
-		lcd_comando(0xc0);
+		lcd_dado('A');
 	}
 	
 	if(!(PIND&(1<< 3))){
-		tx = 'B';
-		lcd_dado(tx);
-		USART_Transmit(0x0d);
-		USART_Transmit(tx);
-		lcd_comando(0xc0);
+		lcd_dado('B');
 	}
 }
 
-void ativa_interrupcao(){
-	PCICR = 0x04;
-	PCMSK2 = 0x0c;
-	sei();
-}
 
 int main(void)
 {
+	DDRD = 0x00;
+	PORTD = 0x0c;
 	DDRB = 0xff;
 	DDRC = 0x07;
-	lcd_init();
+	PORTB = 0xff;
+
 	USART_Init(MYUBRR);
-    lcd_comando(0x80);
-    lcd_print("Interface Serial");
-	USART_putstring("USART para LCD");
-	USART_Transmit(0x0d);
-	ativa_interrupcao();
+	
+	EICRA |= (1 << ISC01);
+	EIMSK |= (1 << INT0)|(1 << INT1);
+	
+	sei();
+	
+	lcd_init();
 	
 	while (1) 
     {		
 		
-		tx = USART_Receive();		
-		lcd_comando(0xc0);
-		lcd_dado(tx);
-		USART_Transmit(0x0d);
-		USART_Transmit(tx);
     }
 }
 

@@ -3,31 +3,31 @@ InterfaceSerial.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000020  00800100  000001cc  00000260  2**0
+  0 .data         00000020  00800100  00000260  000002f4  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000001cc  00000000  00000000  00000094  2**1
+  1 .text         00000260  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000003  00800120  00800120  00000280  2**0
+  2 .bss          00000001  00800120  00800120  00000314  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  00000280  2**0
+  3 .comment      00000030  00000000  00000000  00000314  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000002b0  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000344  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000060  00000000  00000000  000002f0  2**0
+  5 .debug_aranges 00000070  00000000  00000000  00000384  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   000009cc  00000000  00000000  00000350  2**0
+  6 .debug_info   00000a81  00000000  00000000  000003f4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000754  00000000  00000000  00000d1c  2**0
+  7 .debug_abbrev 0000076a  00000000  00000000  00000e75  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00000414  00000000  00000000  00001470  2**0
+  8 .debug_line   0000048b  00000000  00000000  000015df  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  000000bc  00000000  00000000  00001884  2**2
+  9 .debug_frame  00000124  00000000  00000000  00001a6c  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    0000040f  00000000  00000000  00001940  2**0
+ 10 .debug_str    00000436  00000000  00000000  00001b90  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    000001b8  00000000  00000000  00001d4f  2**0
+ 11 .debug_loc    00000283  00000000  00000000  00001fc6  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000050  00000000  00000000  00001f07  2**0
+ 12 .debug_ranges 00000060  00000000  00000000  00002249  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -38,7 +38,7 @@ Disassembly of section .text:
    8:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
    c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
   10:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
-  14:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  14:	0c 94 b5 00 	jmp	0x16a	; 0x16a <__vector_5>
   18:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
   1c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
   20:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
@@ -72,8 +72,8 @@ Disassembly of section .text:
   74:	11 e0       	ldi	r17, 0x01	; 1
   76:	a0 e0       	ldi	r26, 0x00	; 0
   78:	b1 e0       	ldi	r27, 0x01	; 1
-  7a:	ec ec       	ldi	r30, 0xCC	; 204
-  7c:	f1 e0       	ldi	r31, 0x01	; 1
+  7a:	e0 e6       	ldi	r30, 0x60	; 96
+  7c:	f2 e0       	ldi	r31, 0x02	; 2
   7e:	02 c0       	rjmp	.+4      	; 0x84 <__do_copy_data+0x10>
   80:	05 90       	lpm	r0, Z+
   82:	0d 92       	st	X+, r0
@@ -91,33 +91,28 @@ Disassembly of section .text:
   92:	1d 92       	st	X+, r1
 
 00000094 <.do_clear_bss_start>:
-  94:	a3 32       	cpi	r26, 0x23	; 35
+  94:	a1 32       	cpi	r26, 0x21	; 33
   96:	b2 07       	cpc	r27, r18
   98:	e1 f7       	brne	.-8      	; 0x92 <.do_clear_bss_loop>
-  9a:	0e 94 b5 00 	call	0x16a	; 0x16a <main>
-  9e:	0c 94 e4 00 	jmp	0x1c8	; 0x1c8 <_exit>
+  9a:	0e 94 01 01 	call	0x202	; 0x202 <main>
+  9e:	0c 94 2e 01 	jmp	0x25c	; 0x25c <_exit>
 
 000000a2 <__bad_interrupt>:
   a2:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 000000a6 <USART_Init>:
+#define F_CPU 1000000UL
+/* -------------------------------------------- SERIAL ----------------------------------------- */
+
 void USART_Init(unsigned int ubrr){
-	/*Set baud rate */
-	/* UBRR0H contains the 4 most significant bits of the
-	baud rate. UBRR0L contains the 8 least significant
-	bits.*/  
+	
 	UBRR0H = (unsigned char)(ubrr>>8);
   a6:	90 93 c5 00 	sts	0x00C5, r25	; 0x8000c5 <__TEXT_REGION_LENGTH__+0x7e00c5>
 	UBRR0L = (unsigned char)ubrr;
   aa:	80 93 c4 00 	sts	0x00C4, r24	; 0x8000c4 <__TEXT_REGION_LENGTH__+0x7e00c4>
-	
-
-	/*Enable transmitter and receiver */
 	UCSR0B = (1<<RXEN0)|(1<<TXEN0);
   ae:	88 e1       	ldi	r24, 0x18	; 24
   b0:	80 93 c1 00 	sts	0x00C1, r24	; 0x8000c1 <__TEXT_REGION_LENGTH__+0x7e00c1>
-	
-	/* Set frame format: 8data */
 	UCSR0C = (1<<USBS0)|(3<<UCSZ00);
   b4:	8e e0       	ldi	r24, 0x0E	; 14
   b6:	80 93 c2 00 	sts	0x00C2, r24	; 0x8000c2 <__TEXT_REGION_LENGTH__+0x7e00c2>
@@ -127,7 +122,7 @@ void USART_Init(unsigned int ubrr){
 }
 
 void USART_Transmit(unsigned char data){
-	/* Wait for empty transmit buffer */
+
 	while ( !( UCSR0A & (1<<UDRE0)) );
   bc:	e0 ec       	ldi	r30, 0xC0	; 192
   be:	f0 e0       	ldi	r31, 0x00	; 0
@@ -135,7 +130,6 @@ void USART_Transmit(unsigned char data){
   c2:	95 ff       	sbrs	r25, 5
   c4:	fd cf       	rjmp	.-6      	; 0xc0 <USART_Transmit+0x4>
 	
-	/* Put data into buffer, sends the data */
 	UDR0 = data;
   c6:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__TEXT_REGION_LENGTH__+0x7e00c6>
   ca:	08 95       	ret
@@ -271,8 +265,6 @@ void lcd_dado(char dado){
 	
 }
 
-int i;
-
 void lcd_print (char *c){
  14c:	cf 93       	push	r28
  14e:	df 93       	push	r29
@@ -284,9 +276,9 @@ void lcd_print (char *c){
  158:	21 96       	adiw	r28, 0x01	; 1
 			lcd_dado(*c++);     
  15a:	0e 94 9a 00 	call	0x134	; 0x134 <lcd_dado>
+	PORTC &= ~(0x04);
+	
 }
-
-int i;
 
 void lcd_print (char *c){
 		while (*c != 0)         
@@ -299,85 +291,155 @@ void lcd_print (char *c){
  166:	cf 91       	pop	r28
  168:	08 95       	ret
 
-0000016a <main>:
+0000016a <__vector_5>:
+
+/* --------------------------------------------------------------------------------------------- */
 
 char tx;
+
+ISR(PCINT2_vect){
+ 16a:	1f 92       	push	r1
+ 16c:	0f 92       	push	r0
+ 16e:	0f b6       	in	r0, 0x3f	; 63
+ 170:	0f 92       	push	r0
+ 172:	11 24       	eor	r1, r1
+ 174:	2f 93       	push	r18
+ 176:	3f 93       	push	r19
+ 178:	4f 93       	push	r20
+ 17a:	5f 93       	push	r21
+ 17c:	6f 93       	push	r22
+ 17e:	7f 93       	push	r23
+ 180:	8f 93       	push	r24
+ 182:	9f 93       	push	r25
+ 184:	af 93       	push	r26
+ 186:	bf 93       	push	r27
+ 188:	ef 93       	push	r30
+ 18a:	ff 93       	push	r31
+	if(!(PIND&(1<< 2))){
+ 18c:	4a 99       	sbic	0x09, 2	; 9
+ 18e:	0f c0       	rjmp	.+30     	; 0x1ae <__vector_5+0x44>
+		tx = 'A';
+ 190:	81 e4       	ldi	r24, 0x41	; 65
+ 192:	80 93 20 01 	sts	0x0120, r24	; 0x800120 <__data_end>
+		lcd_dado(tx);
+ 196:	0e 94 9a 00 	call	0x134	; 0x134 <lcd_dado>
+		USART_Transmit(0x0d);
+ 19a:	8d e0       	ldi	r24, 0x0D	; 13
+ 19c:	0e 94 5e 00 	call	0xbc	; 0xbc <USART_Transmit>
+		USART_Transmit(tx);
+ 1a0:	80 91 20 01 	lds	r24, 0x0120	; 0x800120 <__data_end>
+ 1a4:	0e 94 5e 00 	call	0xbc	; 0xbc <USART_Transmit>
+		lcd_comando(0xc0);
+ 1a8:	80 ec       	ldi	r24, 0xC0	; 192
+ 1aa:	0e 94 7d 00 	call	0xfa	; 0xfa <lcd_comando>
+	}
+	
+	if(!(PIND&(1<< 3))){
+ 1ae:	4b 99       	sbic	0x09, 3	; 9
+ 1b0:	0f c0       	rjmp	.+30     	; 0x1d0 <__vector_5+0x66>
+		tx = 'B';
+ 1b2:	82 e4       	ldi	r24, 0x42	; 66
+ 1b4:	80 93 20 01 	sts	0x0120, r24	; 0x800120 <__data_end>
+		lcd_dado(tx);
+ 1b8:	0e 94 9a 00 	call	0x134	; 0x134 <lcd_dado>
+		USART_Transmit(0x0d);
+ 1bc:	8d e0       	ldi	r24, 0x0D	; 13
+ 1be:	0e 94 5e 00 	call	0xbc	; 0xbc <USART_Transmit>
+		USART_Transmit(tx);
+ 1c2:	80 91 20 01 	lds	r24, 0x0120	; 0x800120 <__data_end>
+ 1c6:	0e 94 5e 00 	call	0xbc	; 0xbc <USART_Transmit>
+		lcd_comando(0xc0);
+ 1ca:	80 ec       	ldi	r24, 0xC0	; 192
+ 1cc:	0e 94 7d 00 	call	0xfa	; 0xfa <lcd_comando>
+	}
+}
+ 1d0:	ff 91       	pop	r31
+ 1d2:	ef 91       	pop	r30
+ 1d4:	bf 91       	pop	r27
+ 1d6:	af 91       	pop	r26
+ 1d8:	9f 91       	pop	r25
+ 1da:	8f 91       	pop	r24
+ 1dc:	7f 91       	pop	r23
+ 1de:	6f 91       	pop	r22
+ 1e0:	5f 91       	pop	r21
+ 1e2:	4f 91       	pop	r20
+ 1e4:	3f 91       	pop	r19
+ 1e6:	2f 91       	pop	r18
+ 1e8:	0f 90       	pop	r0
+ 1ea:	0f be       	out	0x3f, r0	; 63
+ 1ec:	0f 90       	pop	r0
+ 1ee:	1f 90       	pop	r1
+ 1f0:	18 95       	reti
+
+000001f2 <ativa_interrupcao>:
+
+void ativa_interrupcao(){
+	PCICR = 0x04;
+ 1f2:	84 e0       	ldi	r24, 0x04	; 4
+ 1f4:	80 93 68 00 	sts	0x0068, r24	; 0x800068 <__TEXT_REGION_LENGTH__+0x7e0068>
+	PCMSK2 = 0x0c;
+ 1f8:	8c e0       	ldi	r24, 0x0C	; 12
+ 1fa:	80 93 6d 00 	sts	0x006D, r24	; 0x80006d <__TEXT_REGION_LENGTH__+0x7e006d>
+	sei();
+ 1fe:	78 94       	sei
+ 200:	08 95       	ret
+
+00000202 <main>:
+}
 
 int main(void)
 {
 	DDRB = 0xff;
- 16a:	8f ef       	ldi	r24, 0xFF	; 255
- 16c:	84 b9       	out	0x04, r24	; 4
+ 202:	8f ef       	ldi	r24, 0xFF	; 255
+ 204:	84 b9       	out	0x04, r24	; 4
 	DDRC = 0x07;
- 16e:	87 e0       	ldi	r24, 0x07	; 7
- 170:	87 b9       	out	0x07, r24	; 7
+ 206:	87 e0       	ldi	r24, 0x07	; 7
+ 208:	87 b9       	out	0x07, r24	; 7
 	lcd_init();
- 172:	0e 94 89 00 	call	0x112	; 0x112 <lcd_init>
+ 20a:	0e 94 89 00 	call	0x112	; 0x112 <lcd_init>
 	USART_Init(MYUBRR);
- 176:	8f ec       	ldi	r24, 0xCF	; 207
- 178:	90 e0       	ldi	r25, 0x00	; 0
- 17a:	0e 94 53 00 	call	0xa6	; 0xa6 <USART_Init>
+ 20e:	8c e0       	ldi	r24, 0x0C	; 12
+ 210:	90 e0       	ldi	r25, 0x00	; 0
+ 212:	0e 94 53 00 	call	0xa6	; 0xa6 <USART_Init>
     lcd_comando(0x80);
- 17e:	80 e8       	ldi	r24, 0x80	; 128
- 180:	0e 94 7d 00 	call	0xfa	; 0xfa <lcd_comando>
+ 216:	80 e8       	ldi	r24, 0x80	; 128
+ 218:	0e 94 7d 00 	call	0xfa	; 0xfa <lcd_comando>
     lcd_print("Interface Serial");
- 184:	80 e0       	ldi	r24, 0x00	; 0
- 186:	91 e0       	ldi	r25, 0x01	; 1
- 188:	0e 94 a6 00 	call	0x14c	; 0x14c <lcd_print>
+ 21c:	80 e0       	ldi	r24, 0x00	; 0
+ 21e:	91 e0       	ldi	r25, 0x01	; 1
+ 220:	0e 94 a6 00 	call	0x14c	; 0x14c <lcd_print>
 	USART_putstring("USART para LCD");
- 18c:	81 e1       	ldi	r24, 0x11	; 17
- 18e:	91 e0       	ldi	r25, 0x01	; 1
- 190:	0e 94 6e 00 	call	0xdc	; 0xdc <USART_putstring>
+ 224:	81 e1       	ldi	r24, 0x11	; 17
+ 226:	91 e0       	ldi	r25, 0x01	; 1
+ 228:	0e 94 6e 00 	call	0xdc	; 0xdc <USART_putstring>
 	USART_Transmit(0x0d);
- 194:	8d e0       	ldi	r24, 0x0D	; 13
- 196:	0e 94 5e 00 	call	0xbc	; 0xbc <USART_Transmit>
-    {		
-		
-		tx = USART_Receive();
-		
-		if((PIND&0x04) == 0){			
-			tx = 'A';
- 19a:	d1 e4       	ldi	r29, 0x41	; 65
-		}
-
-		if((PIND&0x08) == 0){
-			tx = 'B';
- 19c:	c2 e4       	ldi	r28, 0x42	; 66
-	USART_Transmit(0x0d);
+ 22c:	8d e0       	ldi	r24, 0x0D	; 13
+ 22e:	0e 94 5e 00 	call	0xbc	; 0xbc <USART_Transmit>
+	ativa_interrupcao();
+ 232:	0e 94 f9 00 	call	0x1f2	; 0x1f2 <ativa_interrupcao>
 	
 	while (1) 
     {		
 		
-		tx = USART_Receive();
- 19e:	0e 94 66 00 	call	0xcc	; 0xcc <USART_Receive>
- 1a2:	80 93 22 01 	sts	0x0122, r24	; 0x800122 <tx>
-		
-		if((PIND&0x04) == 0){			
- 1a6:	4a 9b       	sbis	0x09, 2	; 9
-			tx = 'A';
- 1a8:	d0 93 22 01 	sts	0x0122, r29	; 0x800122 <tx>
-		}
-
-		if((PIND&0x08) == 0){
- 1ac:	4b 9b       	sbis	0x09, 3	; 9
-			tx = 'B';
- 1ae:	c0 93 22 01 	sts	0x0122, r28	; 0x800122 <tx>
-		}
-		
-		USART_Transmit(0x0d);
- 1b2:	8d e0       	ldi	r24, 0x0D	; 13
- 1b4:	0e 94 5e 00 	call	0xbc	; 0xbc <USART_Transmit>
+		tx = USART_Receive();		
+ 236:	0e 94 66 00 	call	0xcc	; 0xcc <USART_Receive>
+ 23a:	80 93 20 01 	sts	0x0120, r24	; 0x800120 <__data_end>
 		lcd_comando(0xc0);
- 1b8:	80 ec       	ldi	r24, 0xC0	; 192
- 1ba:	0e 94 7d 00 	call	0xfa	; 0xfa <lcd_comando>
+ 23e:	80 ec       	ldi	r24, 0xC0	; 192
+ 240:	0e 94 7d 00 	call	0xfa	; 0xfa <lcd_comando>
 		lcd_dado(tx);
- 1be:	80 91 22 01 	lds	r24, 0x0122	; 0x800122 <tx>
- 1c2:	0e 94 9a 00 	call	0x134	; 0x134 <lcd_dado>
-    }
- 1c6:	eb cf       	rjmp	.-42     	; 0x19e <main+0x34>
+ 244:	80 91 20 01 	lds	r24, 0x0120	; 0x800120 <__data_end>
+ 248:	0e 94 9a 00 	call	0x134	; 0x134 <lcd_dado>
+		USART_Transmit(0x0d);
+ 24c:	8d e0       	ldi	r24, 0x0D	; 13
+ 24e:	0e 94 5e 00 	call	0xbc	; 0xbc <USART_Transmit>
+		USART_Transmit(tx);
+ 252:	80 91 20 01 	lds	r24, 0x0120	; 0x800120 <__data_end>
+ 256:	0e 94 5e 00 	call	0xbc	; 0xbc <USART_Transmit>
+ 25a:	ed cf       	rjmp	.-38     	; 0x236 <main+0x34>
 
-000001c8 <_exit>:
- 1c8:	f8 94       	cli
+0000025c <_exit>:
+ 25c:	f8 94       	cli
 
-000001ca <__stop_program>:
- 1ca:	ff cf       	rjmp	.-2      	; 0x1ca <__stop_program>
+0000025e <__stop_program>:
+ 25e:	ff cf       	rjmp	.-2      	; 0x25e <__stop_program>
